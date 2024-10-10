@@ -90,26 +90,23 @@ local chapter2 = {
 
 -- Bible Chapter 3
 local chapter3 = {
-    "Now the serpent was more crafty than any of the wild animals the Lord God had made.",
-    "He said to the woman, 'Did God really say, ‘You must not eat from any tree in the garden’?'",
-    "The woman said to the serpent, 'We may eat fruit from the trees in the garden,",
-    "but God said, ‘You must not eat fruit from the tree that is in the middle of the garden, and you must not touch it, or you will die.’'",
+    "Now the serpent was more crafty than any of the wild animals the Lord God had made. He said to the woman, 'Did God really say, 'You must not eat from any tree in the garden'?'",
+    "The woman said to the serpent, 'We may eat fruit from the trees in the garden, but God said, 'You must not eat fruit from the tree that is in the middle of the garden, and you must not touch it, or you will die.'",
     "'You will not certainly die,' the serpent said to the woman.",
     "'For God knows that when you eat from it your eyes will be opened, and you will be like God, knowing good and evil.'",
-    "When the woman saw that the fruit of the tree was good for food and pleasing to the eye, and also desirable for gaining wisdom, she took some and ate it.",
-    "She also gave some to her husband, who was with her, and he ate it.",
+    "When the woman saw that the fruit of the tree was good for food and pleasing to the eye, and also desirable for gaining wisdom, she took some and ate it. She also gave some to her husband, who was with her, and he ate it.",
     "Then the eyes of both of them were opened, and they realized they were naked; so they sewed fig leaves together and made themselves loincloths.",
     "Then the man and his wife heard the sound of the Lord God as he was walking in the garden in the cool of the day, and they hid from the Lord God among the trees of the garden.",
     "But the Lord God called to the man, 'Where are you?'",
     "He answered, 'I heard you in the garden, and I was afraid because I was naked; so I hid.'",
-    "'Who told you that you were naked? Have you eaten from the tree that I commanded you not to eat from?'",
+    "'Who told you that you were naked?' God asked. 'Have you eaten from the tree that I commanded you not to eat from?'",
     "The man said, 'The woman you put here with me—she gave me some fruit from the tree, and I ate it.'",
     "Then the Lord God said to the woman, 'What is this you have done?'",
-    "'The serpent deceived me, and I ate,' she said.",
-    "So the Lord God said to the serpent, 'Because you have done this, cursed are you above all livestock and all wild animals! You will crawl on your belly and you will eat dust all the days of your life.'",
-    "'And I will put enmity between you and the woman, and between your offspring and hers; he will crush your head, and you will strike his heel.'",
-    "To the woman he said, 'I will make your pains in childbearing very severe; with painful labor you will give birth to children. Your desire will be for your husband, and he will rule over you.'",
-    "To Adam he said, 'Because you listened to your wife and ate fruit from the tree about which I commanded you, “You must not eat from it,” cursed is the ground because of you; through painful toil you will eat food from it all the days of your life.'",
+    "'The serpent deceived me,' she said, 'and I ate.'",
+    "So the Lord God said to the serpent, 'Because you have done this, cursed are you above all livestock and all wild animals! You will crawl on your belly and you will eat dust all the days of your life.",
+    "And I will put enmity between you and the woman, and between your offspring and hers; he will crush your head, and you will strike his heel.'",
+    "To the woman he said, 'I will make your pains in childbirth very severe; with painful labor you will give birth to children. Your desire will be for your husband, and he will rule over you.'",
+    "To Adam he said, 'Because you listened to your wife and ate fruit from the tree about which I commanded you, 'You must not eat from it,' cursed is the ground because of you; through painful toil you will eat food from it all the days of your life.",
     "It will produce thorns and thistles for you, and you will eat the plants of the field.",
     "By the sweat of your brow you will eat your food until you return to the ground, since from it you were taken; for dust you are and to dust you will return.'",
     "Adam named his wife Eve, because she would become the mother of all the living.",
@@ -119,53 +116,56 @@ local chapter3 = {
     "After he drove the man out, he placed on the east side of the Garden of Eden cherubim and a flaming sword flashing back and forth to guard the way to the tree of life."
 }
 
--- Function to display Chapter 1
-local function displayChapter1()
+-- Function to send messages to chat
+local function sendMessageToChat(message)
+    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:Fire(message, "All")
+end
+
+-- Preach Function for Chapter 1
+local function preachChapter1()
     for _, verse in ipairs(chapter1) do
-        print(verse)
+        sendMessageToChat(verse)
         wait(3) -- 3-second delay
     end
 end
 
--- Function to display Chapter 2
-local function displayChapter2()
+-- Preach Function for Chapter 2
+local function preachChapter2()
     for _, verse in ipairs(chapter2) do
-        print(verse)
+        sendMessageToChat(verse)
         wait(3) -- 3-second delay
     end
 end
 
--- Function to display Chapter 3
-local function displayChapter3()
+-- Preach Function for Chapter 3
+local function preachChapter3()
     for _, verse in ipairs(chapter3) do
-        print(verse)
+        sendMessageToChat(verse)
         wait(3) -- 3-second delay
     end
 end
 
--- Button for Chapter 1
-Section:AddButton({
-    Name = "Display Chapter 1",
+-- Add buttons for each chapter
+Tab:AddButton({
+    Name = "Preach Chapter 1",
     Callback = function()
-        displayChapter1()
+        preachChapter1()
     end
 })
 
--- Button for Chapter 2
-Section:AddButton({
-    Name = "Display Chapter 2",
+Tab:AddButton({
+    Name = "Preach Chapter 2",
     Callback = function()
-        displayChapter2()
+        preachChapter2()
     end
 })
 
--- Button for Chapter 3
-Section:AddButton({
-    Name = "Display Chapter 3",
+Tab:AddButton({
+    Name = "Preach Chapter 3",
     Callback = function()
-        displayChapter3()
+        preachChapter3()
     end
 })
 
--- Show the Orion window
+-- Show the window
 OrionLib:Init()
