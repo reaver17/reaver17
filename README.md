@@ -1,3 +1,4 @@
+-- Load the Orion Library
 local player = game.Players.LocalPlayer
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
@@ -39,7 +40,7 @@ local chapter1 = {
     "Then God said, 'Let the land produce vegetation: seed-bearing plants and trees on the land that bear fruit with seed in it, according to their various kinds.' And it was so.",
     "The land produced vegetation: plants bearing seed according to their kinds and trees bearing fruit with seed in it according to their kinds. And God saw that it was good.",
     "And there was evening, and there was morning—the third day.",
-    "And God said, 'Let there be lights in the vault of the sky to separate the day from the night, and let them serve as signs to mark sacred times, and days and years,",
+    "And God said, 'Let there be lights in the vault of the sky to separate the day from the night, and let them serve as signs to mark sacred times, and days and years,'",
     "and let them be lights in the vault of the sky to give light on the earth.' And it was so.",
     "God made two great lights—the greater light to govern the day and the lesser light to govern the night. He also made the stars.",
     "God set them in the vault of the sky to give light on the earth, to govern the day and the night, and to separate light from darkness. And God saw that it was good.",
@@ -63,9 +64,6 @@ local chapter1 = {
 
 -- Bible Chapter 2
 local chapter2 = {
-    "Thus the heavens and the earth were completed in all their vast array.",
-    "By the seventh day, God had finished the work he had been doing; so on the seventh day he rested from all his work.",
-    "Then God blessed the seventh day and made it holy, because on it he rested from all the work of creating that he had done.",
     "This is the account of the heavens and the earth when they were created, when the Lord God made the earth and the heavens.",
     "Now no shrub had yet appeared on the earth and no plant had yet sprung up, for the Lord God had not sent rain on the earth and there was no one to work the ground,",
     "but streams came up from the earth and watered the whole surface of the ground.",
@@ -91,21 +89,23 @@ local chapter2 = {
 -- Bible Chapter 3
 local chapter3 = {
     "Now the serpent was more crafty than any of the wild animals the Lord God had made. He said to the woman, 'Did God really say, 'You must not eat from any tree in the garden'?'",
-    "The woman said to the serpent, 'We may eat fruit from the trees in the garden, but God said, 'You must not eat fruit from the tree that is in the middle of the garden, and you must not touch it, or you will die.'",
-    "'You will not certainly die,' the serpent said to the woman.",
-    "'For God knows that when you eat from it your eyes will be opened, and you will be like God, knowing good and evil.'",
-    "When the woman saw that the fruit of the tree was good for food and pleasing to the eye, and also desirable for gaining wisdom, she took some and ate it. She also gave some to her husband, who was with her, and he ate it.",
+    "The woman said to the serpent, 'We may eat the fruit from the trees in the garden,",
+    "but God said, 'You must not eat fruit from the tree that is in the middle of the garden, and you must not touch it, or you will Die.",
+    "You will not certainly die,' the serpent said to the woman.",
+    "For God knows that when you eat from it your eyes will be opened, and you will be like God, knowing good and evil.'",
+    "When the woman saw that the fruit of the tree was good for food and pleasing to the eye, and also desirable for gaining wisdom, she took some and ate it.",
+    "She also gave some to her husband, who was with her, and he ate it.",
     "Then the eyes of both of them were opened, and they realized they were naked; so they sewed fig leaves together and made themselves loincloths.",
     "Then the man and his wife heard the sound of the Lord God as he was walking in the garden in the cool of the day, and they hid from the Lord God among the trees of the garden.",
     "But the Lord God called to the man, 'Where are you?'",
     "He answered, 'I heard you in the garden, and I was afraid because I was naked; so I hid.'",
-    "'Who told you that you were naked?' God asked. 'Have you eaten from the tree that I commanded you not to eat from?'",
+    "And he said, 'Who told you that you were naked? Have you eaten from the tree that I commanded you not to eat from?'",
     "The man said, 'The woman you put here with me—she gave me some fruit from the tree, and I ate it.'",
     "Then the Lord God said to the woman, 'What is this you have done?'",
-    "'The serpent deceived me,' she said, 'and I ate.'",
+    "The woman said, 'The serpent deceived me, and I ate.'",
     "So the Lord God said to the serpent, 'Because you have done this, cursed are you above all livestock and all wild animals! You will crawl on your belly and you will eat dust all the days of your life.",
     "And I will put enmity between you and the woman, and between your offspring and hers; he will crush your head, and you will strike his heel.'",
-    "To the woman he said, 'I will make your pains in childbirth very severe; with painful labor you will give birth to children. Your desire will be for your husband, and he will rule over you.'",
+    "To the woman he said, 'I will make your pains in childbearing very severe; with painful labor you will give birth to children. Your desire will be for your husband, and he will rule over you.'",
     "To Adam he said, 'Because you listened to your wife and ate fruit from the tree about which I commanded you, 'You must not eat from it,' cursed is the ground because of you; through painful toil you will eat food from it all the days of your life.",
     "It will produce thorns and thistles for you, and you will eat the plants of the field.",
     "By the sweat of your brow you will eat your food until you return to the ground, since from it you were taken; for dust you are and to dust you will return.'",
@@ -118,54 +118,51 @@ local chapter3 = {
 
 -- Function to send messages to chat
 local function sendMessageToChat(message)
-    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:Fire(message, "All")
-end
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    local chatService = replicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
 
--- Preach Function for Chapter 1
-local function preachChapter1()
-    for _, verse in ipairs(chapter1) do
-        sendMessageToChat(verse)
-        wait(3) -- 3-second delay
+    if chatService and chatService:FindFirstChild("SayMessageRequest") then
+        local success, err = pcall(function()
+            chatService.SayMessageRequest:FireServer(message, "All")
+        end)
+
+        if not success then
+            warn("Error sending message: " .. err)
+        end
+    else
+        warn("Chat service not available.")
     end
 end
 
--- Preach Function for Chapter 2
-local function preachChapter2()
-    for _, verse in ipairs(chapter2) do
+-- Function to preach chapters
+local function preachChapter(chapter)
+    for _, verse in ipairs(chapter) do
         sendMessageToChat(verse)
-        wait(3) -- 3-second delay
+        wait(2) -- Wait for 2 seconds before sending the next message
     end
 end
 
--- Preach Function for Chapter 3
-local function preachChapter3()
-    for _, verse in ipairs(chapter3) do
-        sendMessageToChat(verse)
-        wait(3) -- 3-second delay
-    end
-end
-
--- Add buttons for each chapter
+-- Buttons to preach each chapter
 Tab:AddButton({
     Name = "Preach Chapter 1",
     Callback = function()
-        preachChapter1()
+        preachChapter(chapter1)
     end
 })
 
 Tab:AddButton({
     Name = "Preach Chapter 2",
     Callback = function()
-        preachChapter2()
+        preachChapter(chapter2)
     end
 })
 
 Tab:AddButton({
     Name = "Preach Chapter 3",
     Callback = function()
-        preachChapter3()
+        preachChapter(chapter3)
     end
 })
 
--- Show the window
+-- Orion Library UI setup
 OrionLib:Init()
