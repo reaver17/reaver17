@@ -24,16 +24,7 @@ OrionLib:MakeNotification({
     Time = 5
 })
 
--- List of gospel messages
-local messages = {
-    "For God so loved the world that He gave His one and only Son. - John 3:16",
-    "I can do all things through Christ who strengthens me. - Philippians 4:13",
-    "The Lord is my shepherd; I shall not want. - Psalm 23:1",
-    "Trust in the Lord with all your heart. - Proverbs 3:5",
-    "And we know that in all things God works for the good of those who love him. - Romans 8:28"
-}
-
--- Bible Chapter 1 Recitation (Genesis 1)
+-- Bible Chapter 1
 local chapter1 = {
     "In the beginning, God created the heavens and the earth.",
     "Now the earth was formless and empty, darkness was over the surface of the deep, and the Spirit of God was hovering over the waters.",
@@ -63,11 +54,39 @@ local chapter1 = {
     "So God created mankind in his own image, in the image of God he created them; male and female he created them.",
     "God blessed them and said to them, 'Be fruitful and increase in number; fill the earth and subdue it. Rule over the fish in the sea and the birds in the sky and over every living creature that moves on the ground.'",
     "Then God said, 'I give you every seed-bearing plant on the face of the whole earth and every tree that has fruit with seed in it. They will be yours for food.",
-    "And to all the beasts of the earth and all the birds in the sky and all the creatures that move along the ground—everything that has the breath of life in it—I give every green plant for food.' And it was so.",
+    "And to all the beasts of the earth and all the birds in the sky and all the creatures that move on the ground—everything that has the breath of life in it—I give every green plant for food.' And it was so.",
     "God saw all that he had made, and it was very good. And there was evening, and there was morning—the sixth day.",
     "Thus the heavens and the earth were completed in all their vast array.",
     "By the seventh day, God had finished the work he had been doing; so on the seventh day he rested from all his work.",
     "Then God blessed the seventh day and made it holy, because on it he rested from all the work of creating that he had done."
+}
+
+-- Bible Chapter 2
+local chapter2 = {
+    "Thus the heavens and the earth were completed in all their vast array.",
+    "By the seventh day, God had finished the work he had been doing; so on the seventh day he rested from all his work.",
+    "Then God blessed the seventh day and made it holy, because on it he rested from all the work of creating that he had done.",
+    "This is the account of the heavens and the earth when they were created, when the Lord God made the earth and the heavens.",
+    "Now no shrub had yet appeared on the earth and no plant had yet sprung up, for the Lord God had not sent rain on the earth and there was no one to work the ground,",
+    "but streams came up from the earth and watered the whole surface of the ground.",
+    "Then the Lord God formed a man from the dust of the ground and breathed into his nostrils the breath of life, and the man became a living being.",
+    "Now the Lord God had planted a garden in the east, in Eden; and there he put the man he had formed.",
+    "The Lord God made all kinds of trees grow out of the ground—trees that were pleasing to the eye and good for food. In the middle of the garden were the tree of life and the tree of the knowledge of good and evil.",
+    "A river watering the garden flowed from Eden; from there it was separated into four headwaters.",
+    "The name of the first is the Pishon; it winds through the entire land of Havilah, where there is gold. (The gold of that land is good; aromatic resin and onyx are also there.)",
+    "The name of the second river is the Gihon; it winds through the entire land of Cush.",
+    "The name of the third river is the Tigris; it runs along the east side of Ashur. And the fourth river is the Euphrates.",
+    "The Lord God took the man and put him in the Garden of Eden to work it and take care of it.",
+    "And the Lord God commanded the man, 'You are free to eat from any tree in the garden; but you must not eat from the tree of the"
+    "knowledge of good and evil, for when you eat from it you will certainly die.'",
+    "The Lord God said, 'It is not good for the man to be alone. I will make a helper suitable for him.'",
+    "Now the Lord God had formed out of the ground all the wild animals and all the birds in the sky. He brought them to the man to see what he would name them; and whatever the man called each living creature, that was its name.",
+    "So the man gave names to all the livestock, the birds in the sky, and all the wild animals. But for Adam no suitable helper was found.",
+    "So the Lord God caused the man to fall into a deep sleep; and while he was sleeping, he took one of the man's ribs and then closed up the place with flesh.",
+    "Then the Lord God made a woman from the rib he had taken out of the man, and he brought her to the man.",
+    "The man said, 'This is now bone of my bones and flesh of my flesh; she shall be called 'woman,' for she was taken out of man.'",
+    "That is why a man leaves his father and mother and is united to his wife, and they become one flesh.",
+    "Adam and his wife were both naked, and they felt no shame."
 }
 
 -- Function to make the local player chat
@@ -77,22 +96,40 @@ local function makeLocalPlayerChat(message)
         [2] = "All"  -- Send the message to all players
     }
     
-    -- Fire the SayMessageRequest event
-    game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(unpack(args))
+    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
 end
 
--- Function to start reciting Bible Chapter 1
+-- Function to recite Chapter 1
 local function reciteChapter1()
     for _, verse in ipairs(chapter1) do
         makeLocalPlayerChat(verse)
-        wait(5) -- Wait 5 seconds between each verse
+        wait(5)  -- 5 seconds delay between verses
     end
 end
 
--- Preach Button
+-- Function to recite Chapter 2
+local function reciteChapter2()
+    for _, verse in ipairs(chapter2) do
+        makeLocalPlayerChat(verse)
+        wait(5)  -- 5 seconds delay between verses
+    end
+end
+
+-- Button for Chapter 1
 Tab:AddButton({
-    Name = "Preach the Gospel",
+    Name = "Recite Genesis Chapter 1",
     Callback = function()
-        reciteChapter1() -- Start reciting chapter 1 when the button is clicked
+        reciteChapter1()
     end
 })
+
+-- Button for Chapter 2
+Tab:AddButton({
+    Name = "Recite Genesis Chapter 2",
+    Callback = function()
+        reciteChapter2()
+    end
+})
+
+-- Load the Orion Library UI
+OrionLib:Init()
