@@ -55,7 +55,10 @@ local chapter1 = {
     "God blessed them and said to them, 'Be fruitful and increase in number; fill the earth and subdue it. Rule over the fish in the sea and the birds in the sky and over every living creature that moves on the ground.'",
     "Then God said, 'I give you every seed-bearing plant on the face of the whole earth and every tree that has fruit with seed in it. They will be yours for food.",
     "And to all the beasts of the earth and all the birds in the sky and all the creatures that move on the ground—everything that has the breath of life in it—I give every green plant for food.' And it was so.",
-    "God saw all that he had made, and it was very good. And there was evening, and there was morning—the sixth day."
+    "God saw all that he had made, and it was very good. And there was evening, and there was morning—the sixth day.",
+    "Thus the heavens and the earth were completed in all their vast array.",
+    "By the seventh day, God had finished the work he had been doing; so on the seventh day he rested from all his work.",
+    "Then God blessed the seventh day and made it holy, because on it he rested from all the work of creating that he had done."
 }
 
 -- Bible Chapter 2
@@ -80,32 +83,89 @@ local chapter2 = {
     "So the man gave names to all the livestock, the birds in the sky, and all the wild animals. But for Adam no suitable helper was found.",
     "So the Lord God caused the man to fall into a deep sleep; and while he was sleeping, he took one of the man's ribs and then closed up the place with flesh.",
     "Then the Lord God made a woman from the rib he had taken out of the man, and he brought her to the man.",
-        "This is now bone of my bones and flesh of my flesh; she shall be called 'woman,' for she was taken out of man.'",
+    "The man said, 'This is now bone of my bones and flesh of my flesh; she shall be called 'woman,' for she was taken out of man.'",
     "That is why a man leaves his father and mother and is united to his wife, and they become one flesh.",
     "Adam and his wife were both naked, and they felt no shame."
 }
 
--- Function to send verses to chat
-local function sendToChat(chapter)
-    for _, verse in ipairs(chapter) do
-        game:GetService("Chat"):Chat(player.Character.Head, verse, Enum.ChatColor.Blue)  -- or any color you prefer
-        wait(1)  -- wait a second between each verse to avoid chat spam
+-- Bible Chapter 3
+local chapter3 = {
+    "Now the serpent was more crafty than any of the wild animals the Lord God had made.",
+    "He said to the woman, 'Did God really say, ‘You must not eat from any tree in the garden’?'",
+    "The woman said to the serpent, 'We may eat fruit from the trees in the garden,",
+    "but God said, ‘You must not eat fruit from the tree that is in the middle of the garden, and you must not touch it, or you will die.’'",
+    "'You will not certainly die,' the serpent said to the woman.",
+    "'For God knows that when you eat from it your eyes will be opened, and you will be like God, knowing good and evil.'",
+    "When the woman saw that the fruit of the tree was good for food and pleasing to the eye, and also desirable for gaining wisdom, she took some and ate it.",
+    "She also gave some to her husband, who was with her, and he ate it.",
+    "Then the eyes of both of them were opened, and they realized they were naked; so they sewed fig leaves together and made themselves loincloths.",
+    "Then the man and his wife heard the sound of the Lord God as he was walking in the garden in the cool of the day, and they hid from the Lord God among the trees of the garden.",
+    "But the Lord God called to the man, 'Where are you?'",
+    "He answered, 'I heard you in the garden, and I was afraid because I was naked; so I hid.'",
+    "'Who told you that you were naked? Have you eaten from the tree that I commanded you not to eat from?'",
+    "The man said, 'The woman you put here with me—she gave me some fruit from the tree, and I ate it.'",
+    "Then the Lord God said to the woman, 'What is this you have done?'",
+    "'The serpent deceived me, and I ate,' she said.",
+    "So the Lord God said to the serpent, 'Because you have done this, cursed are you above all livestock and all wild animals! You will crawl on your belly and you will eat dust all the days of your life.'",
+    "'And I will put enmity between you and the woman, and between your offspring and hers; he will crush your head, and you will strike his heel.'",
+    "To the woman he said, 'I will make your pains in childbearing very severe; with painful labor you will give birth to children. Your desire will be for your husband, and he will rule over you.'",
+    "To Adam he said, 'Because you listened to your wife and ate fruit from the tree about which I commanded you, “You must not eat from it,” cursed is the ground because of you; through painful toil you will eat food from it all the days of your life.'",
+    "It will produce thorns and thistles for you, and you will eat the plants of the field.",
+    "By the sweat of your brow you will eat your food until you return to the ground, since from it you were taken; for dust you are and to dust you will return.'",
+    "Adam named his wife Eve, because she would become the mother of all the living.",
+    "The Lord God made garments of skin for Adam and his wife and clothed them.",
+    "And the Lord God said, 'The man has now become like one of us, knowing good and evil. He must not be allowed to reach out his hand and take also from the tree of life and eat, and live forever.'",
+    "So the Lord God banished him from the Garden of Eden to work the ground from which he had been taken.",
+    "After he drove the man out, he placed on the east side of the Garden of Eden cherubim and a flaming sword flashing back and forth to guard the way to the tree of life."
+}
+
+-- Function to display Chapter 1
+local function displayChapter1()
+    for _, verse in ipairs(chapter1) do
+        print(verse)
+        wait(3) -- 3-second delay
     end
 end
 
--- Buttons to trigger the chapters
-Tab:AddButton({
-    Name = "Preach Genesis Chapter 1",
+-- Function to display Chapter 2
+local function displayChapter2()
+    for _, verse in ipairs(chapter2) do
+        print(verse)
+        wait(3) -- 3-second delay
+    end
+end
+
+-- Function to display Chapter 3
+local function displayChapter3()
+    for _, verse in ipairs(chapter3) do
+        print(verse)
+        wait(3) -- 3-second delay
+    end
+end
+
+-- Button for Chapter 1
+Section:AddButton({
+    Name = "Display Chapter 1",
     Callback = function()
-        sendToChat(chapter1)
-    end    
+        displayChapter1()
+    end
 })
 
-Tab:AddButton({
-    Name = "Preach Genesis Chapter 2",
+-- Button for Chapter 2
+Section:AddButton({
+    Name = "Display Chapter 2",
     Callback = function()
-        sendToChat(chapter2)
-    end    
+        displayChapter2()
+    end
 })
 
-OrionLib:Init()  -- Initialize the Orion Library
+-- Button for Chapter 3
+Section:AddButton({
+    Name = "Display Chapter 3",
+    Callback = function()
+        displayChapter3()
+    end
+})
+
+-- Show the Orion window
+OrionLib:Init()
