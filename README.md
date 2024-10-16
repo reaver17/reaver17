@@ -2,11 +2,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Create a RemoteEvent in ReplicatedStorage for teleport requests
-local teleportEvent = Instance.new("RemoteEvent")
-teleportEvent.Name = "TeleportEvent"
-teleportEvent.Parent = ReplicatedStorage
-
 -- Function to find a player by either username, display name, or partial username
 local function findPlayerByName(name)
     -- Check for exact username or display name match first
@@ -44,15 +39,25 @@ local function onPlayerChatted(player, message)
                 local character = player.Character
                 if character and character:FindFirstChild("HumanoidRootPart") then
                     character.HumanoidRootPart.CFrame = CFrame.new(targetPosition)
-                    -- Notify player of successful teleport
+
+                    -- Notify player of successful teleport in the chat
                     player:SendNotification({
                         Title = "Teleport",
                         Text = "Teleported to " .. targetPlayer.DisplayName,
                         Duration = 5
                     })
+
+                    -- Send a message in chat
+                    local successMessage = "You have been teleported to " .. targetPlayer.DisplayName .. "!"
+                    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {
+                        Text = successMessage;
+                        Color = Color3.fromRGB(0, 255, 0);
+                        Font = Enum.Font.SourceSansBold;
+                        FontSize = Enum.FontSize.Size24;
+                    })
                 end
             else
-                -- Send error message to the player if target's character is missing
+                -- Error message if the target player's character is not found
                 player:SendNotification({
                     Title = "Error",
                     Text = "Target player's character not found.",
@@ -60,7 +65,7 @@ local function onPlayerChatted(player, message)
                 })
             end
         else
-            -- Send error message to the player if target player is not found
+            -- Error message if the target player is not found
             player:SendNotification({
                 Title = "Error",
                 Text = "Player not found: " .. targetName,
@@ -72,6 +77,15 @@ end
 
 -- Connect the chat event for each player
 Players.PlayerAdded:Connect(function(player)
+    -- Send a message when the player joins
+    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {
+        Text = "Script made by Blacksun";
+        Color = Color3.fromRGB(255, 215, 0);
+        Font = Enum.Font.SourceSansBold;
+        FontSize = Enum.FontSize.Size24;
+    })
+
+    -- Listen for chat commands from the player
     player.Chatted:Connect(function(message)
         onPlayerChatted(player, message)
     end)
