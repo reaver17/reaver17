@@ -1,5 +1,6 @@
 -- Services
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local TeleportService = game:GetService("TeleportService")
 local localPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -7,15 +8,18 @@ local UserInputService = game:GetService("UserInputService")
 -- The valid key
 local VALID_KEY = "Blacklight"
 
+-- Variables for bang animation and connections
+local bangAnim, bangLoop, bangDied, loadedAnim
+
 -- Function to create a custom notification UI
 local function createCustomNotification(titleText, bodyText, duration)
     local screenGui = Instance.new("ScreenGui")
-    screenGui.Parent = localPlayer:WaitForChild("PlayerGui") -- Attach to the player's GUI
+    screenGui.Parent = localPlayer:WaitForChild("PlayerGui")
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0.3, 0, 0.2, 0) -- Size: 30% width, 20% height of screen
-    frame.Position = UDim2.new(0.35, 0, 0.8, 0) -- Position: Centered at bottom
-    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Fancy black background
+    frame.Size = UDim2.new(0.3, 0, 0.2, 0)
+    frame.Position = UDim2.new(0.35, 0, 0.8, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     frame.BorderSizePixel = 0
     frame.Parent = screenGui
 
@@ -40,7 +44,6 @@ local function createCustomNotification(titleText, bodyText, duration)
     bodyLabel.Parent = frame
 
     wait(duration or 4)
-
     frame:TweenPosition(UDim2.new(0.35, 0, 1.2, 0), "Out", "Quad", 1, true)
     wait(1)
     screenGui:Destroy()
@@ -96,10 +99,20 @@ local function createKeyInputGUI()
     end)
 end
 
+-- Function to preload the "bang" animation for R6 and R15 avatars
+local function preloadBangAnimation()
+    bangAnim = Instance.new("Animation")
+    local humanoid = localPlayer.Character and localPlayer.Character:FindFirstChildWhichIsA("Humanoid")
+    if humanoid and humanoid.RigType == Enum.HumanoidRigType.R15 then
+        bangAnim.AnimationId = "rbxassetid://5918726674" -- R15 bang animation ID
+    else
+        bangAnim.AnimationId = "rbxassetid://148840371" -- R6 bang animation ID
+    end
+end
+preloadBangAnimation()
+
 -- Function to enable commands after key validation
 local function enableCommands()
-    local bangAnim, bangLoop, bangDied, loadedAnim
-
     -- Function to find a player by either username, display name, or partial username
     local function findPlayerByName(name)
         local lowerName = name:lower()
@@ -116,10 +129,71 @@ local function enableCommands()
         return nil
     end
 
+    -- Function to perform the "bang" attack with no speed limit
+    local function performBang(targetName, speed)
+        local targetPlayer = findPlayerByName(targetName)
+        if targetPlayer then
+            local targetCharacter = targetPlayer.Character
+            if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
+                local targetPosition = targetCharacter.HumanoidRootPart.Position
+                local character = localPlayer.Character
+                if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChildWhichIsA("Humanoid") then
+                    -- Teleport behind the target
+                    character.HumanoidRootPart.CFrame = CFrame.new(targetPosition) * CFrame.new(0, 0, 2)
+
+                    -- Play the "bang" animation
+                    local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+                    loadedAnim = humanoid:LoadAnimation(bangAnim)
+                    loadedAnim:Play(0.1, 1, 1)
+
+                    -- Allow any speed, no limit
+                    loadedAnim:AdjustSpeed(speed or 10)
+
+                    -- Continuously follow the target behind them
+                    bangLoop = RunService.Stepped:Connect(function()
+                        if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
+                            character.HumanoidRootPart.CFrame = targetCharacter.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
+                        end
+                    end)
+
+                    -- Stop the animation when the humanoid dies
+                    bangDied = humanoid.Died:Connect(function()
+                        loadedAnim:Stop()
+                        bangLoop:Disconnect()
+                        bangDied:Disconnect()
+                    end)
+                else
+                    createCustomNotification("Error", "Your character or humanoid not found.", 4)
+                end
+            else
+                createCustomNotification("Error", "Target player's character not found.", 4)
+            end
+        else
+            createCustomNotification("Error", "Player not found: " .. targetName, 4)
+        end
+    end
+
+    -- Function to stop the "bang" animation and movement
+    local function unBang()
+        if loadedAnim then
+            loadedAnim:Stop()
+        end
+        if bangLoop then
+            bangLoop:Disconnect()
+            bangLoop = nil
+        end
+        if bangDied then
+            bangDied:Disconnect()
+            bangDied = nil
+        end
+        createCustomNotification("Success", "Bang stopped.", 4)
+    end
+
     -- Function to handle teleport command
     local function teleportToPlayer(targetName)
         local targetPlayer = findPlayerByName(targetName)
-        if targetPlayer then
+        if
+        targetPlayer then
             local targetCharacter = targetPlayer.Character
             if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
                 local targetPosition = targetCharacter.HumanoidRootPart.Position
@@ -138,31 +212,14 @@ local function enableCommands()
         end
     end
 
-    -- Clean up resources and stop active animations
-    local function cleanup()
-        if loadedAnim then
-            loadedAnim:Stop()
-            loadedAnim = nil
-        end
-        if bangLoop then
-            bangLoop:Disconnect()
-            bangLoop = nil
-        end
-        if bangDied then
-            bangDied:Disconnect()
-            bangDied = nil
-        end
-    end
-
-    -- Rejoin current server
+    -- Function to rejoin the current server
     local function rejoinServer()
         local placeId = game.PlaceId
         local jobId = game.JobId
-        cleanup() -- Clean up before teleporting
         TeleportService:TeleportToPlaceInstance(placeId, jobId, localPlayer)
     end
 
-    -- Server hop (find a different server)
+    -- Function to server hop (find a different server)
     local function serverHop()
         local placeId = game.PlaceId
         local servers = TeleportService:GetGameInstanceAsync(placeId)
@@ -174,7 +231,6 @@ local function enableCommands()
             end
         end
         if differentServerId then
-            cleanup() -- Clean up before teleporting
             TeleportService:TeleportToPlaceInstance(placeId, differentServerId, localPlayer)
         else
             createCustomNotification("Server Hop Error", "No other servers found.", 4)
@@ -192,6 +248,11 @@ local function enableCommands()
         elseif message:lower() == ">serverhop" then
             createCustomNotification("Server Hop", "Finding a new server...", 4)
             serverHop()
+        elseif message:sub(1, 5):lower() == ">bang" then
+            local targetName = message:sub(7):gsub("%s+", "")
+            performBang(targetName)
+        elseif message:lower() == ">unbang" then
+            unBang()
         end
     end
 
@@ -208,13 +269,6 @@ local function enableCommands()
         newPlayer.CharacterAdded:Connect(function()
             createCustomNotification("New Player", newPlayer.DisplayName .. " has joined!", 3)
         end)
-        end)
-
-    -- Listen for when a player leaves and disconnect any connections related to that player
-    Players.PlayerRemoving:Connect(function(player)
-        if player == localPlayer then
-            cleanup() -- Clean up when the local player leaves
-        end
     end)
 end
 
