@@ -11,6 +11,18 @@ local VALID_KEY = "Blacklight"
 -- Variables for bang animation and connections
 local bangAnim, bangLoop, bangDied, loadedAnim
 
+-- Preload the "bang" animation for R6 and R15 avatars
+local function preloadBangAnimation()
+    bangAnim = Instance.new("Animation")
+    local humanoid = localPlayer.Character and localPlayer.Character:FindFirstChildWhichIsA("Humanoid")
+    if humanoid and humanoid.RigType == Enum.HumanoidRigType.R15 then
+        bangAnim.AnimationId = "rbxassetid://5918726674" -- R15 bang animation ID
+    else
+        bangAnim.AnimationId = "rbxassetid://148840371" -- R6 bang animation ID
+    end
+end
+preloadBangAnimation()
+
 -- Function to create a custom notification UI
 local function createCustomNotification(titleText, bodyText, duration)
     local screenGui = Instance.new("ScreenGui")
@@ -99,18 +111,6 @@ local function createKeyInputGUI()
     end)
 end
 
--- Function to preload the "bang" animation for R6 and R15 avatars
-local function preloadBangAnimation()
-    bangAnim = Instance.new("Animation")
-    local humanoid = localPlayer.Character and localPlayer.Character:FindFirstChildWhichIsA("Humanoid")
-    if humanoid and humanoid.RigType == Enum.HumanoidRigType.R15 then
-        bangAnim.AnimationId = "rbxassetid://5918726674" -- R15 bang animation ID
-    else
-        bangAnim.AnimationId = "rbxassetid://148840371" -- R6 bang animation ID
-    end
-end
-preloadBangAnimation()
-
 -- Function to enable commands after key validation
 local function enableCommands()
     -- Function to find a player by either username, display name, or partial username
@@ -192,8 +192,7 @@ local function enableCommands()
     -- Function to handle teleport command
     local function teleportToPlayer(targetName)
         local targetPlayer = findPlayerByName(targetName)
-        if
-        targetPlayer then
+        if targetPlayer then
             local targetCharacter = targetPlayer.Character
             if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
                 local targetPosition = targetCharacter.HumanoidRootPart.Position
@@ -212,14 +211,14 @@ local function enableCommands()
         end
     end
 
-    -- Function to rejoin the current server
+    -- Rejoin current server
     local function rejoinServer()
         local placeId = game.PlaceId
         local jobId = game.JobId
         TeleportService:TeleportToPlaceInstance(placeId, jobId, localPlayer)
     end
 
-    -- Function to server hop (find a different server)
+    -- Server hop (find a different server)
     local function serverHop()
         local placeId = game.PlaceId
         local servers = TeleportService:GetGameInstanceAsync(placeId)
@@ -249,8 +248,9 @@ local function enableCommands()
             createCustomNotification("Server Hop", "Finding a new server...", 4)
             serverHop()
         elseif message:sub(1, 5):lower() == ">bang" then
-            local targetName = message:sub(7):gsub("%s+", "")
-            performBang(targetName)
+            local targetName, speed = message:match(">bang%s+(%S+)%s*(%d*)")
+            speed = tonumber(speed) or 10
+            performBang(targetName, speed)
         elseif message:lower() == ">unbang" then
             unBang()
         end
