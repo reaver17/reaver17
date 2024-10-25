@@ -35,8 +35,8 @@ local function findPlayerByName(name)
     return nil
 end
 
--- Function to perform the "bang" attack with no speed limit
-local function performBang(targetName, speed)
+-- Function to perform the "bang" or "face" action with no speed limit
+local function performAction(targetName, speed, isBang)
     local targetPlayer = findPlayerByName(targetName)
     if targetPlayer then
         local targetCharacter = targetPlayer.Character
@@ -44,31 +44,30 @@ local function performBang(targetName, speed)
             local targetPosition = targetCharacter.HumanoidRootPart.Position
             local character = localPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChildWhichIsA("Humanoid") then
-                -- Teleport behind the target
-                character.HumanoidRootPart.CFrame = CFrame.new(targetPosition) * CFrame.new(0, 0, 2)
+                -- Position player relative to the target (behind for bang, in front for face)
+                local relativePosition = isBang and CFrame.new(0, 0, 2) or CFrame.new(0, 0, -2)
+                character.HumanoidRootPart.CFrame = CFrame.new(targetPosition) * relativePosition
 
                 -- Play the "bang" animation
                 local humanoid = character:FindFirstChildWhichIsA("Humanoid")
                 loadedAnim = humanoid:LoadAnimation(bangAnim)
                 loadedAnim:Play(0.1, 1, 1)
-
-                -- Allow any speed, no limit
                 loadedAnim:AdjustSpeed(speed or 10)
 
-                -- Continuously follow the target behind them
+                -- Continuously follow the target at the specified position
                 bangLoop = RunService.Stepped:Connect(function()
                     if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
-                        character.HumanoidRootPart.CFrame = targetCharacter.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
+                        character.HumanoidRootPart.CFrame = targetCharacter.HumanoidRootPart.CFrame * relativePosition
                     end
                 end)
 
                 -- Stop the animation when the humanoid dies
                 bangDied = humanoid.Died:Connect(function()
                     loadedAnim:Stop()
-                    bangLoop:Disconnect()
-                    bangDied:Disconnect()
+                    unBang() -- Ensure we call unBang to clean up
                 end)
-                print("Bang started on " .. targetPlayer.Name)
+
+                print((isBang and "Bang" or "Face") .. " started on " .. targetPlayer.Name)
             else
                 print("Error: Your character or humanoid not found.")
             end
@@ -80,10 +79,11 @@ local function performBang(targetName, speed)
     end
 end
 
--- Function to stop the "bang" animation and movement
+-- Function to stop the "bang" or "face" animation and movement
 local function unBang()
     if loadedAnim then
         loadedAnim:Stop()
+        loadedAnim = nil
     end
     if bangLoop then
         bangLoop:Disconnect()
@@ -93,7 +93,7 @@ local function unBang()
         bangDied:Disconnect()
         bangDied = nil
     end
-    print("Bang stopped.")
+    print("Bang or Face stopped.")
 end
 
 -- Function to handle teleport command
@@ -159,7 +159,11 @@ local function onPlayerChatted(message)
     elseif message:sub(1, 5):lower() == ">bang" then
         local targetName, speed = message:match(">bang%s+(%S+)%s*(%d*)")
         speed = tonumber(speed) or 10
-        performBang(targetName, speed)
+        performAction(targetName, speed, true)  -- true for bang (behind target)
+    elseif message:sub(1, 5):lower() == ">face" then
+        local targetName, speed = message:match(">face%s+(%S+)%s*(%d*)")
+        speed = tonumber(speed) or 10
+        performAction(targetName, speed, false)  -- false for face (in front of target)
     elseif message:lower() == ">unbang" then
         unBang()
     end
