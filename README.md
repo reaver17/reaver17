@@ -192,3 +192,4 @@ end
 -- Connect the chat event for the local player
 localPlayer.Chatted:Connect(function(message)
     onPlayerChatted(message)
+end)
