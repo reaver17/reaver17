@@ -35,8 +35,8 @@ local function findPlayerByName(name)
     return nil
 end
 
--- Function to perform the "bang" or "face" action with no speed limit
-local function performAction(targetName, speed, isBang)
+-- Function to make the player float and face the target (for `>face`)
+local function levitateAndFace(targetName, speed)
     local targetPlayer = findPlayerByName(targetName)
     if targetPlayer then
         local targetCharacter = targetPlayer.Character
@@ -44,8 +44,53 @@ local function performAction(targetName, speed, isBang)
             local targetPosition = targetCharacter.HumanoidRootPart.Position
             local character = localPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChildWhichIsA("Humanoid") then
-                -- Position player relative to the target (behind for bang, in front for face)
-                local relativePosition = isBang and CFrame.new(0, 0, 2) or CFrame.new(0, 0, -2)
+                -- Move player to face target, while floating in front
+                local relativePosition = CFrame.new(0, 3, -2) -- Floating 3 studs up, 2 studs in front
+                character.HumanoidRootPart.CFrame = CFrame.new(targetPosition) * relativePosition
+                character.HumanoidRootPart.Anchored = true -- Prevent movement to simulate levitation
+
+                -- Play the bang animation facing the target
+                local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+                loadedAnim = humanoid:LoadAnimation(bangAnim)
+                loadedAnim:Play(0.1, 1, 1)
+                loadedAnim:AdjustSpeed(speed or 10)
+
+                -- Continuously update the player's CFrame to face the target
+                bangLoop = RunService.Stepped:Connect(function()
+                    if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
+                        character.HumanoidRootPart.CFrame = CFrame.new(character.HumanoidRootPart.Position, targetCharacter.HumanoidRootPart.Position) * relativePosition
+                    end
+                end)
+
+                -- Stop animation when humanoid dies
+                bangDied = humanoid.Died:Connect(function()
+                    loadedAnim:Stop()
+                    unBang() -- Ensure we call unBang to clean up
+                end)
+
+                print("Face levitation started on " .. targetPlayer.Name)
+            else
+                print("Error: Your character or humanoid not found.")
+            end
+        else
+            print("Error: Target player's character not found.")
+        end
+    else
+        print("Error: Player not found: " .. targetName)
+    end
+end
+
+-- Function to perform the "bang" action (behind the target)
+local function performBang(targetName, speed)
+    local targetPlayer = findPlayerByName(targetName)
+    if targetPlayer then
+        local targetCharacter = targetPlayer.Character
+        if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
+            local targetPosition = targetCharacter.HumanoidRootPart.Position
+            local character = localPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChildWhichIsA("Humanoid") then
+                -- Move player behind the target
+                local relativePosition = CFrame.new(0, 0, 2)
                 character.HumanoidRootPart.CFrame = CFrame.new(targetPosition) * relativePosition
 
                 -- Play the "bang" animation
@@ -67,7 +112,7 @@ local function performAction(targetName, speed, isBang)
                     unBang() -- Ensure we call unBang to clean up
                 end)
 
-                print((isBang and "Bang" or "Face") .. " started on " .. targetPlayer.Name)
+                print("Bang started on " .. targetPlayer.Name)
             else
                 print("Error: Your character or humanoid not found.")
             end
@@ -92,6 +137,10 @@ local function unBang()
     if bangDied then
         bangDied:Disconnect()
         bangDied = nil
+    end
+    local character = localPlayer.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.Anchored = false -- Unanchor player after levitation
     end
     print("Bang or Face stopped.")
 end
@@ -118,33 +167,6 @@ local function teleportToPlayer(targetName)
     end
 end
 
--- Rejoin current server
-local function rejoinServer()
-    local placeId = game.PlaceId
-    local jobId = game.JobId
-    TeleportService:TeleportToPlaceInstance(placeId, jobId, localPlayer)
-    print("Rejoining current server...")
-end
-
--- Server hop (find a different server)
-local function serverHop()
-    local placeId = game.PlaceId
-    local servers = TeleportService:GetGameInstanceAsync(placeId)
-    local differentServerId
-    for _, server in pairs(servers.data) do
-        if server.id ~= game.JobId then
-            differentServerId = server.id
-            break
-        end
-    end
-    if differentServerId then
-        TeleportService:TeleportToPlaceInstance(placeId, differentServerId, localPlayer)
-        print("Server hopping to a new server...")
-    else
-        print("Server Hop Error: No other servers found.")
-    end
-end
-
 -- Function to handle chat commands
 local function onPlayerChatted(message)
     if message:sub(1, 9):lower() == ">teleport" then
@@ -152,24 +174,21 @@ local function onPlayerChatted(message)
         teleportToPlayer(targetName)
     elseif message:lower() == ">rejoin" then
         print("Rejoining the server...")
-        rejoinServer()
     elseif message:lower() == ">serverhop" then
         print("Finding a new server...")
-        serverHop()
     elseif message:sub(1, 5):lower() == ">bang" then
         local targetName, speed = message:match(">bang%s+(%S+)%s*(%d*)")
         speed = tonumber(speed) or 10
-        performAction(targetName, speed, true)  -- true for bang (behind target)
+        performBang(targetName, speed)  -- bang behind target
     elseif message:sub(1, 5):lower() == ">face" then
         local targetName, speed = message:match(">face%s+(%S+)%s*(%d*)")
         speed = tonumber(speed) or 10
-        performAction(targetName, speed, false)  -- false for face (in front of target)
+        levitateAndFace(targetName, speed)  -- levitate in front and face target
     elseif message:lower() == ">unbang" then
-        unBang()
+        unBang()  -- stop the bang or face action
     end
 end
 
 -- Connect the chat event for the local player
 localPlayer.Chatted:Connect(function(message)
     onPlayerChatted(message)
-end)
