@@ -1,6 +1,7 @@
 -- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TeleportService = game:GetService("TeleportService")
 local localPlayer = Players.LocalPlayer
 
 -- Variables for bang animation and connections
@@ -43,16 +44,16 @@ local function levitateAndFaceBang(targetName, speed)
             local targetHead = targetCharacter.Head
             local character = localPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChildWhichIsA("Humanoid") then
-                -- Step 1: Teleport player to target's head level
-                local relativePosition = CFrame.new(0, 0, -2) -- 2 studs in front of the head
+                -- Step 1: Teleport player slightly closer and elevated
+                local relativePosition = CFrame.new(0, 2, -2) -- 2 studs above and 2 studs in front of the head
                 character.HumanoidRootPart.CFrame = targetHead.CFrame * relativePosition
                 character.HumanoidRootPart.Anchored = true -- Make the player float in place
 
                 -- Step 2: Continuously face the target and move with them
                 bangLoop = RunService.RenderStepped:Connect(function()
                     if targetCharacter and targetCharacter:FindFirstChild("Head") then
-                        -- Update position to stay in front of the head
-                        character.HumanoidRootPart.CFrame = targetCharacter.Head.CFrame * relativePosition
+                        -- Update position to stay in front and above the head
+                        character.HumanoidRootPart.CFrame = targetCharacter.Head.CFrame * CFrame.new(0, 2, -2)
                         -- Adjust the player’s orientation to face the target's head
                         character.HumanoidRootPart.CFrame = CFrame.new(character.HumanoidRootPart.Position, targetCharacter.Head.Position)
                     else
@@ -111,12 +112,47 @@ local function onPlayerChatted(message)
         local targetName, speed = message:match(">face%s+(%S+)%s*(%d*)")
         speed = tonumber(speed) or 1
         levitateAndFaceBang(targetName, speed)  -- Levitates, faces, and performs bang animation
-    elseif message:lower() == ">unbang" then
+    elseif message:lower() == ">unbang" or message:lower() == ">unface" then
         unBang()  -- Stops any bang/face action
+    elseif message:sub(1, 7):lower() == ">teleport" then
+        local targetName = message:match(">teleport%s+(%S+)")
+        teleportToPlayer(targetName)  -- Teleport to the specified player
+    elseif message:lower() == ">rejoin" then
+        rejoinGame()  -- Rejoin the current game
+    elseif message:sub(1, 10):lower() == ">serverhop" then
+        local placeId = message:match(">serverhop%s+(%d+)")
+        if placeId then
+            serverHop(placeId)  -- Server hop to the specified place ID
+        else
+            print("Error: Please provide a valid place ID for server hopping.")
+        end
     end
 end
 
+-- Function to teleport to another player
+local function teleportToPlayer(targetName)
+    local targetPlayer = findPlayerByName(targetName)
+    if targetPlayer and targetPlayer.Character then
+        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+        localPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition)
+        print("Teleported to " .. targetPlayer.Name .. "'s location.")
+    else
+        print("Error: Player not found or character not available: " .. targetName)
+    end
+end
+
+-- Function to rejoin the current game
+local function rejoinGame()
+    local placeId = game.PlaceId
+    TeleportService:Teleport(placeId, localPlayer)  -- Rejoin the current game
+    print("Rejoining the game...")
+end
+
+-- Function to server hop to a specified place ID
+local function serverHop(placeId)
+    TeleportService:Teleport(placeId, localPlayer)  -- Server hop to the specified place ID
+    print("Server hopping to place ID: " .. placeId)
+end
+
 -- Connect the chat event for the local player
-localPlayer.Chatted:Connect(function(message)
-    onPlayerChatted(message)
-end)
+localPlayer.Chatted:Connect(onPlayerChatted)
