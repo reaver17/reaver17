@@ -45,7 +45,7 @@ local function levitateAndFaceBang(targetName, speed)
             local character = localPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChildWhichIsA("Humanoid") then
                 -- Step 1: Teleport player slightly closer and elevated
-                local relativePosition = CFrame.new(0, 2, -2) -- 2 studs above and 2 studs in front of the head
+                local relativePosition = CFrame.new(0, 2, -1) -- 2 studs above and 2 studs in front of the head
                 character.HumanoidRootPart.CFrame = targetHead.CFrame * relativePosition
                 character.HumanoidRootPart.Anchored = true -- Make the player float in place
 
@@ -53,7 +53,7 @@ local function levitateAndFaceBang(targetName, speed)
                 bangLoop = RunService.RenderStepped:Connect(function()
                     if targetCharacter and targetCharacter:FindFirstChild("Head") then
                         -- Update position to stay in front and above the head
-                        character.HumanoidRootPart.CFrame = targetCharacter.Head.CFrame * CFrame.new(0, 2, -2)
+                        character.HumanoidRootPart.CFrame = targetCharacter.Head.CFrame * CFrame.new(0, 2, -1)
                         -- Adjust the player’s orientation to face the target's head
                         character.HumanoidRootPart.CFrame = CFrame.new(character.HumanoidRootPart.Position, targetCharacter.Head.Position)
                     else
