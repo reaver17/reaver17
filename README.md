@@ -38,9 +38,8 @@ local function C_a()
         ["Y"] = "Ү", ["y"] = "у",
         ["Z"] = "Ζ", ["z"] = "ᴢ",
         [" "] = " "  -- Narrow No-Break Space
-    }
 
--- Function to filter and replace characters in a message
+        -- Function to filter and replace characters in a message
     local function filterMessage(message)
         local filteredMessage = ""
         for i = 1, #message do
@@ -59,3 +58,4 @@ local function C_a()
 end
 
 C_a()
+    }
